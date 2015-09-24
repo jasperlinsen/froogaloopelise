@@ -1,0 +1,107 @@
+$size: 40px;
+$icons: 'vimeo.froogaloopelise.svg'; 
+
+@mixin full-screen($prefix:''){
+	width: 100%;
+	height: 100%;
+	iframe {
+		width: 100%;
+		height: 100%;
+	}
+	ul {
+		transform: #{$prefix}translateY(0%);
+	}
+	ul li.fullscreen { background-position: -($size * 3) (-$size); }
+}
+
+.froogaloop-wrapper {
+	position: relative;
+	display: block;
+	overflow: hidden;
+	iframe {
+		display: block;
+	}
+	
+	ul {
+		box-sizing: border-box;
+		position: absolute;
+		bottom: 0;
+		left: 0;
+		margin: 0;
+		padding: $size / 4;
+		list-style: none;
+		width: 100%;
+		background: #000;
+		background: rgba(0,0,0,0.5);
+		transform: translateY(100%);
+		transition: transform .5s;
+		li {
+			float: left;
+			width: $size; 
+			height: $size;
+			margin-right: $size / 4;
+			position: relative;
+			text-indent: -99999px;
+			color: #fff;
+			font-size: $size / 2;
+			cursor: pointer;
+			background: url(#{$icons}) no-repeat 0 0;
+			background-size: ($size * 4) auto;
+			&.seek {
+				background: none;
+				width: calc(100% - #{(($size + $size / 4) * 3) + $size} - #{$size / 4});
+				span, &:before {
+					content: '';
+					position: absolute;
+					left: 0;
+					top: 50%;
+					height: 50%;
+					display: block;
+					transform: translateY(-50%);
+					margin: 0;
+				}
+				&:before {
+					width: 100%;
+					height: 2px;
+					border: none;
+					background: #fff;
+				}
+				span {
+					height: $size / 2;
+					background: transparent;
+					border-radius: 0;
+					border-right: 3px solid #fff;
+				}
+			}
+			&.paused 		{ background-position: 0 0; }
+			&.playing 		{ background-position: 0 (-$size); }
+			&.rewind 		{ background-position: -$size 0; }
+			&.volume 		{ background-position: -($size * 2) 0; }
+			&.volume span	{
+				height: $size;
+				display: block;
+				overflow: hidden;
+				&:after {
+					content: '';
+					position: absolute;
+					left: 0;
+					top: $size / 60 * 2;
+					width: $size;
+					height: $size;
+					background: url($icons) no-repeat;
+					background-size: ($size * 4) auto;
+					background-position: -($size * 2) (-$size);
+				}
+			}
+			&.fullscreen 	{ background-position: -($size * 3) 0; }
+			&:last-child { margin-right: 0; }
+		}
+	}
+	&:hover ul {
+		transform: translateY(0%);
+	}
+	&:-webkit-full-screen { @include full-screen('-webkit-'); }
+	&:-moz-full-screen { @include full-screen('-moz-'); }
+	&:-ms-fullscreen { @include full-screen('-ms-'); }
+	&:fullscreen { @include full-screen; }
+}
