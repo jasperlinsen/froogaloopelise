@@ -1,7 +1,5 @@
-// Standard Froogaloop Implementation to create a 'standard' custom player
-
 // Froogaloopelise(querySelectorLString) -> true;
-//
+// Initialise a request for a Froogaloopelise wrapper
 function Froogaloopelise(querySelector){
   Froogaloopelise.addScript();
   // If the API has not yet loaded, create and add to queue
@@ -10,7 +8,7 @@ function Froogaloopelise(querySelector){
     return;
   }
   
-  // Initiliase iframes
+  // Initialise iFrames
   for(
     var i = 0, iframes = document.querySelectorAll(querySelector); 
     i < iframes.length; 
@@ -36,21 +34,25 @@ function Froogaloopelise(querySelector){
   }
   return true;
 }
+// Basic Stored Variables
 Froogaloopelise.id = 1; 
 Froogaloopelise.scriptAdded = false;
 Froogaloopelise.queue = [];
+
 // Froogaloopelise.getId([element:<iframe>]) -> String
 // Get a unique Id or return the already existing id of the element
 Froogaloopelise.getId = function(element){
   return element && element.getAttribute('id') 
     ? element.getAttribute('id')
     : 'froogaloop-' + Froogaloopelise.id++;
-}; 
+};
+
 // Froogaloopelise.executeQueue() -> Void
 // Execute whatever is stacked in the queue since start
 Froogaloopelise.executeQueue = function(){
   Froogaloopelise.queue.forEach(Froogaloopelise);
 }
+
 // Froogaloopelise.addScript() -> Void
 // Add the froogaloop api script to the <head>, wait for it to load
 Froogaloopelise.addScript = function(){
