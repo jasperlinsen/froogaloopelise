@@ -1,0 +1,24 @@
+@function icon-play($color:white){
+	@return svg-url('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="26.1px" height="30.1px"><polygon fill="#{$color}" points="0,0 26.1,15.1 0,30.1 "/></svg>');
+}
+@function icon-pause($color:white){
+	@return svg-url('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="26.1px" height="30.1px" viewBox="0 0 26.1 30.1"><rect x="0" y="0" width="9.6" height="30.1" fill="#{$color}" /><rect x="16.5" y="0" width="9.6" height="30.1" fill="#{$color}" /></svg>');
+}
+@function icon-rewind($color:white){
+	@return svg-url('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="46.6px" height="40.7px" viewBox="0 0 46.6 40.7"><path fill="#{$color}" d="M26.3,0v5.7c8,0,14.6,6.6,14.6,14.7S34.2,35,26.1,35c-7.4,0-13.6-5.7-14.6-12.8h5.2L8.4,7.7L0,22.2h5.8 c1,10.1,9.7,18.5,20.3,18.5c11.2,0,20.5-9.1,20.5-20.3S37.3,0,26.3,0z"/></svg>');
+}
+@function icon-enter-fullscreen($color:white){
+	@return svg-url('<svg version="1.1" xmlns="http://www.w3.org/2000/svg"  x="0px" y="0px"  width="39px" height="39px" viewBox="0 0 39 39"><path d="M39,14V0H25v4h7.3L19,17.3L5.8,4H13V0H0v14h4V7.6l12.3,12.3L4,32.3V25H0v14h13v-4H6.7L19,22.6L31.4,35H25v4h14V25h-4v8.2 L21.7,19.9L35,6.7V14H39z M35.5,3.5L35.5,3.5L35.5,3.5z M2.6,3.5L2.6,3.5L2.6,3.5z M2.6,36.4L2.6,36.4L2.6,36.4z M35.5,36.4 L35.5,36.4L35.5,36.4z" fill="#{$color}" /></svg>');
+}
+@function icon-exit-fullscreen($color:white){
+	@return svg-url('<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="42.8px" height="42.8px" viewBox="0 0 42.8 42.8"><polygon fill="#{$color}"  points="15,12.5 2.7,0.2 0,2.9 12.2,15 6,15 6,19 19,19 19,6 15,6 "/><polygon fill="#{$color}"  points="37,15 30.3,15 42.7,2.7 41.3,1.3 40,0 28,11.9 28,6 24,6 24,19 37,19 "/><polygon fill="#{$color}"  points="30.9,28 37,28 37,24 24,24 24,37 28,37 28,30.6 40.1,42.7 41.5,41.3 42.8,40 "/><polygon fill="#{$color}"  points="6,28 12.3,28 0.2,40.1 2.9,42.8 15,30.7 15,37 19,37 19,24 6,24 "/></svg>');
+}
+@function icon-volume-underlay($color:white){
+	@return svg-url('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px"width="51px" height="39.9px" viewBox="0 0 51 39.9"><path fill="#{$color}" d="M10.6,39.9H0V28.4h10.6V39.9z M1,38.9h8.6v-9.5H1V38.9z"/><path fill="#{$color}" d="M24,39.9H13.5V18.3H24V39.9z M14.5,38.9H23V19.3h-8.6V38.9z"/><path fill="#{$color}" d="M37.5,39.9H26.9V8.8h10.6V39.9z M27.9,38.9h8.6V9.8h-8.6V38.9z"/><path fill="#{$color}" d="M51,39.9H40.4V0H51V39.9z M41.4,38.9H50V1h-8.6V38.9z"/></svg>');
+}
+@function icon-volume-overlay ($color:white){
+	@return svg-url('<svg version="1.1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="50px" height="38.9px" viewBox="0 0 50 38.9"><rect fill="#{$color}" x="0" y="28.4" width="9.6" height="10.5"/><rect fill="#{$color}" x="13.5" y="18.3" width="9.6" height="20.6"/><rect fill="#{$color}" x="26.9" y="8.8" width="9.6" height="30.1"/><rect fill="#{$color}" x="40.4" y="0" width="9.6" height="38.9"/></svg>');
+}
+@function icon-volume($color:white){
+	@return svg-url('<svg version="1.1"  xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="27.1px" height="43.4px" viewBox="0 0 27.1 43.4"><polygon fill="#{$color}" points="0,13.2 0,32 15.7,32 27.1,43.4 27.1,0 15.7,13.1 "/></svg>');
+}

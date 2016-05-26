@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+	<title>Froogaloopelise</title>
+	<script type="text/javascript" src="../src/vimeo.froogaloopelise.js"></script>
+	<script type="text/javascript" src="../plugin/vimeo.froogaloopelise.omniture.js"></script>
+	<link rel="stylesheet" type="text/css" href="../dist/vimeo.froogaloopelise.css" />
+</head>
+<body>
+	<iframe src="https://player.vimeo.com/video/135343318/" width="670" height="377" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+	<script type="text/javascript">
+		var i = false;
+		froogaloopelise.init('iframe[src*="vimeo"]', function(a){
+			froogaloopeliseOmnitureCallback(a);
+			if(!i && (i = !i)) a.froogaloop.api('play');
+		});
+	</script>
+</body>
+</html>

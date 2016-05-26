@@ -1,266 +1,273 @@
-// Froogaloopelise(querySelectorLString) -> true;
-// Initialise a request for a Froogaloopelise wrapper
-function Froogaloopelise(querySelector){
-  Froogaloopelise.addScript();
-  // If the API has not yet loaded, create and add to queue
-  if(!Froogaloopelise.scriptAdded){
-    Froogaloopelise.queue.push(querySelector);
-    return;
-  }
-  
-  // Initialise iFrames
-  for(
-    var i = 0, iframes = document.querySelectorAll(querySelector); 
-    i < iframes.length; 
-    i++
-  ){
-  
-    var iframe, id, src;
-    iframe = iframes.item(i);
-    // Set an id;
-    id	= Froogaloopelise.getId(iframe);
-    iframe.setAttribute('id', id);
-    
-    // Set the api and id for the player
-    src = iframe.getAttribute('src');
-    src = src.indexOf('?') >= 0 ? src + '&' : src + '?';
-    src = src + 'api=1&player_id=' + id;
-    
-    iframe.setAttribute('src', src);
-    
-    // Create the meaty DOM
-    iframe = Froogaloopelise.addUI(iframe, id);
-    
-  }
-  return true;
-}
-// Basic Stored Variables
-Froogaloopelise.id = 1; 
-Froogaloopelise.scriptAdded = false;
-Froogaloopelise.queue = [];
+var froogaloopelise = {};
 
-// Froogaloopelise.getId([element:<iframe>]) -> String
-// Get a unique Id or return the already existing id of the element
-Froogaloopelise.getId = function(element){
-  return element && element.getAttribute('id') 
-    ? element.getAttribute('id')
-    : 'froogaloop-' + Froogaloopelise.id++;
-};
+froogaloopelise.init = function(query, callback){
 
-// Froogaloopelise.executeQueue() -> Void
-// Execute whatever is stacked in the queue since start
-Froogaloopelise.executeQueue = function(){
-  Froogaloopelise.queue.forEach(Froogaloopelise);
+	// Append the script and rerun the function
+	if(!document.querySelector('script[src*="https://f.vimeocdn.com/js/froogaloop2.min.js"]')){
+		
+		var script 	= document.createElement('script');
+		
+		script.id	= 'froogaloopise-script';
+		script.type = 'text/javascript';
+		script.addEventListener('load', function(){ froogaloopelise.init(query, callback); }, false);
+		script.src 	= 'https://f.vimeocdn.com/js/froogaloop2.min.js';
+		
+		document.head.appendChild(script);
+		
+		return;
+	
+	}
+	
+	var iframes = document.querySelectorAll(query || 'iframe[src*="vimeo"]');
+		iframes = Array.prototype.slice.call(iframes);
+	
+	var wrappers = this.each(iframes, this.wrap, function(wrapper){
+		froogaloopelise.playPause(wrapper);
+		froogaloopelise.volume(wrapper);
+		froogaloopelise.seek(wrapper);
+		froogaloopelise.rewind(wrapper);
+		froogaloopelise.fullscreen(wrapper);
+		froogaloopelise.resizeable(wrapper);
+		
+		wrapper.querySelector('ul.controls').className = '[ froogaloopelise : controls ]';
+		
+		if(callback) callback(wrapper);
+	});
+	
+	return wrappers;
+
 }
 
-// Froogaloopelise.addScript() -> Void
-// Add the froogaloop api script to the <head>, wait for it to load
-Froogaloopelise.addScript = function(){
+froogaloopelise.id = (function(){ var id = 0; return function(prefix){
+	id++; return (prefix || 'froogaloopelise-vimeo-') + id;
+}})();
 
-	if(Froogaloopelise.scriptAdded || document.getElementById('froogaloop-script')) 
-		return false;
+froogaloopelise.each = function(elements, func, callback){
+	if(elements instanceof Array || elements.length){
+		for(var i = 0; i < elements.length; i++)
+			elements[i] = func(elements[i], callback);
+	} else {
+		return [func(wrapper, callback)];
+	}
+	return elements;
+}
+
+froogaloopelise.wrap = function(element, callback){
+	var wrapper = document.createElement('div');
+		wrapper.className = '[ froogaloopelise : wrapper ]';
+		element.parentNode.insertBefore(wrapper, element);
+	var controls = document.createElement('ul');
+		controls.className = '[ froogaloopelise : controls : loading ]';
+		wrapper.name = element.getAttribute('data-name') || froogaloopelise.id();
+		element.src += '?player_id=' + wrapper.name;
+		element.id = wrapper.name;
+		wrapper.appendChild(element);
+		wrapper.appendChild(controls);
+		wrapper.froogaloop = $f(element);
+		wrapper.froogaloop.addEvent('ready', function(id){
+			wrapper.froogaloop.api('getDuration', function(v){ 
+				wrapper.duration = v;
+				if(callback) callback(wrapper);
+			});
+		});
+	return wrapper;
+}
+
+froogaloopelise.playPause = function(element){
 	
-	var script 			= document.createElement('script');
-		script.id		= 'froogaloop-script';
-		script.type 	= 'text/javascript';
-		script.src 		= 'https://f.vimeocdn.com/js/froogaloop2.min.js';
-		script.addEventListener('load', function(){
-			Froogaloopelise.scriptAdded = true
-			Froogaloopelise.executeQueue();
-		}, false);
-		
-	document.head.appendChild(script);
+	var playPause = document.createElement('li');
+		playPause.className = '[ froogaloopelise : controls : play-pause : paused ]';
+		playPause.textContent = 'Play';
+	
+	var currentPlayState = false;
+	
+	playPause.addEventListener('click', function(event){
+		event.preventDefault();
+		element.froogaloop.api('paused', function(paused){
+			if(paused) element.froogaloop.api('play');
+			else element.froogaloop.api('pause');
+		});
+	});
+	element.froogaloop.addEvent('play', function(){
+		playPause.textContent = 'Pause';
+		playPause.className = '[ froogaloopelise : controls : play-pause : playing ]';
+	});
+	element.froogaloop.addEvent('pause', function(){
+		playPause.textContent = 'Play';
+		playPause.className = '[ froogaloopelise : controls : play-pause : paused ]';
+	});
+	
+	element.querySelector('ul.controls').appendChild(playPause);
 	
 }
-// Froogaloopelise.FullScreenAPI
-// Fullscreen API with prefixing.
-Froogaloopelise.FullScreenAPI = {
-  fullScreenElement: false,
-  requestFulLScreen: function(element){
-    if (element.requestFullscreen) {
-      element.requestFullscreen();
-    } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen();
-    } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen();
-    } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen();
-    } else {
-      return false;
-    }
-    this.fullScreenElement = element;
-    this.fullScreenElement.addEventListener('fullscreenchange', function(){
-      this.fullScreenElement.removeAttribute('data-is-fullscreen');
-      this.fullScreenElement = false;
-    }.bind(this), false)
-    this.fullScreenElement.setAttribute('data-is-fullscreen', 'true');
-    return true;
-  },
-  exitFullScreen: function(){
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else {
-      return false;
-    }
-    return true;
-  }
+
+froogaloopelise.rewind = function(element){
+	
+	var rewind = document.createElement('li');
+		rewind.className = '[ froogaloopelise : controls : rewind ]';
+		rewind.textContent = 'Rewind';
+	
+	rewind.addEventListener('click', function(event){
+		event.preventDefault();
+		element.froogaloop.api('seekTo', 0);
+	});
+	
+	element.querySelector('ul.controls').appendChild(rewind);
+	
 }
-// Froogaloopelise.addUI(iframe:<node>) -> <node>
-// Adds DOM elements and wraps into wrapper
-Froogaloopelise.addUI = function(iframe){
 
-  var wrapper, list, froogaloop, duration;
-  
-  wrapper = document.createElement('div');
-  wrapper .className = '[ froogaloop froogaloop-wrapper ]'
-  iframe  .parentNode.insertBefore(wrapper, iframe);
-  iframe  .parentNode.removeChild(iframe);
-  wrapper .appendChild(iframe);
+froogaloopelise.seek = function(element){
+	var seek = document.createElement('li');
+		seek.className = '[ froogaloopelise : controls : seek ]';
+	var scrub = document.createElement('span');
+		scrub.className = '[ froogaloopelise : controls : seek-scrub ]';
+	var duration = getFormattedTime(element.duration * 1000);
+		scrub.textContent = '00:00 / ' + duration;
+		scrub.style.width = 0;
+		
+	seek.appendChild(scrub);
 	
-  function resizeIframe(){
-    iframe.width = wrapper.clientWidth;
-    iframe.height = wrapper.clientWidth / 16 * 9;
-  }
-
-  window.addEventListener('resize', resizeIframe, false);
-  resizeIframe();
-
-  list = document.createElement('ul');
-  wrapper .appendChild(list);
-  
-  // On froogaloop ready, add elements
-  $f(iframe).addEvent('ready', function(id){
-    froogaloop 	= $f(id);
-    froogaloop.api('getDuration', function(v){ duration = v; });
-      var playpause;
-
-      // Play/Pause Button
-      playpause = document.createElement('li');
-      playpause .className = '[ froogaloop play-pause state: paused ]';
-      playpause .textContent = 'Play';
-      playpause .addEventListener('click', function(){
-      froogaloop.api('paused', function(paused){
-        if(paused)
-          froogaloop.api('play');
-        else
-          froogaloop.api('pause');
-        });
-      });
-      list.appendChild(playpause);
-
-      froogaloop.addEvent('play', function(){
-        playpause.textContent = 'Pause';
-        playpause.className = '[ froogaloop play-pause state: playing ]';
-      });
-      froogaloop.addEvent('pause', function(){
-        playpause.textContent = 'Play';
-        playpause.className = '[ froogaloop play-pause state: paused ]';
-      });
-
-      var rewind;
-
-      rewind = document.createElement('li');
-      rewind .className = '[ froogaloop rewind ]';
-      rewind .textContent = 'Rewind';
-      rewind .addEventListener('click', function(){
-        froogaloop.api('seekTo', 0);
-      });
-      list.appendChild(rewind);
-
-      var durationScrubber, durationScrubberPassed, durationMouseEvent;
-		
-      function durationScrubHandler(event){
-        if(!durationMouseEvent || !duration || !durationScrubber) 
-	      return;
-        var offsetParent = durationScrubber, 
-        left = event.pageX - durationScrubber.offsetLeft;
-        while(offsetParent.offsetParent){ 
-          offsetParent = offsetParent.offsetParent;
-          left -= offsetParent.offsetLeft;
-        }
-        froogaloop.api('seekTo', duration * left / durationScrubber.offsetWidth);
-      }
-
-      durationScrubber = document.createElement('li');
-      durationScrubber .className = '[ froogaloop scrubber seek ]';
-      durationScrubberPassed = document.createElement('span');
-      durationScrubberPassed .className = '[ froogaloop scrubber seeker ]';
-      durationScrubberPassed .textContent = 'Seek';
-      durationScrubberPassed .style.width = '0%';
-      durationScrubber .appendChild(durationScrubberPassed);
-      durationScrubber .addEventListener('mousedown', function(event){ 
-        durationMouseEvent = true;
-        durationScrubHandler(event);
-      }, false);
-      durationScrubber .addEventListener('mouseup', 	function(){ 
-        durationMouseEvent = false; 
-      }, false);
-      durationScrubber .addEventListener('mouseleave', 	function(){ 
-        durationMouseEvent = false; 
-      }, false);
-      durationScrubber .addEventListener('mousemove', durationScrubHandler, false);
-      list.appendChild(durationScrubber);
-		
-      froogaloop.addEvent('playProgress', function(data){
-        durationScrubberPassed.style.width = (data.percent * 100) + '%';
-      });
+	function getFormattedTime(milliSeconds){
+		var hours = Math.floor(milliSeconds / (60 * 60 * 1000));
+		var minutes = Math.floor((milliSeconds - hours * (60 * 60 * 1000)) / (60 * 1000));
+		var seconds = Math.floor((milliSeconds - hours * (60 * 60 * 1000) - minutes * (60 * 1000)) / (1000));
+		return 	(hours ? ('0000' + hours).slice(-4) + ':' : '') 
+				+ ('00' + minutes).slice(-2) + ':' 
+				+ ('00' + seconds).slice(-2);
+	}
 	
-      var volumeScrubber, volumeScrubberPassed, volumeMouseEvent;
-		
-      function volumeScrubHandler(event){
-        if(!volumeMouseEvent || !volumeScrubber) return;
-        var offsetParent = volumeScrubber, 
-        left = event.pageX - volumeScrubber.offsetLeft;
-        while(offsetParent.offsetParent){ 
-          offsetParent = offsetParent.offsetParent;
-          left -= offsetParent.offsetLeft;
-        }
-        left = Math.round(left / volumeScrubber.offsetWidth * 10);
-        volumeScrubberPassed.style.width = (left * 10) + '%';
-        froogaloop.api('setVolume', left / 10);
-      }
+	element.froogaloop.addEvent('playProgress', function(data){
+		scrub.style.width = (data.percent * 100) + '%';
+		scrub.textContent = getFormattedTime(data.seconds * 1000) + ' / ' + duration;
+	});
+				
+	var seeking = false;
+	seek.addEventListener('mousedown', function(event){
+		seeking = event.clientX;
+	});
+	document.addEventListener('mousemove', function(event){
+		if(seeking !== false){
+			seeking = event.pageX;
+			var bb = seek.getBoundingClientRect();
+			var where = (seeking - bb.left) / bb.width;
+			scrub.style.width = (where * 100) + '%';
+			element.froogaloop.api('seekTo', where * element.duration);
+		}
+	});
+	document.addEventListener('mouseup', function(){
+		if(seeking !== false){
+			var bb = seek.getBoundingClientRect();
+			var where = (seeking - bb.left) / bb.width;
+			scrub.style.width = (where * 100) + '%';
+			element.froogaloop.api('seekTo', where * element.duration);
+			seeking = false;
+		}
+	});
+	
+	element.querySelector('ul.controls').appendChild(seek);
+	
+}
 
-      volumeScrubber = document.createElement('li');
-      volumeScrubber .className = '[ froogaloop scrubber volume ]';
-      volumeScrubberPassed = document.createElement('span');
-      volumeScrubberPassed .className = '[ froogaloop scrubber volume ]';
-      volumeScrubberPassed .textContent = 'Volume';
-      volumeScrubberPassed .style.width = '50%';
-      volumeScrubber .appendChild(volumeScrubberPassed);
-      volumeScrubber .addEventListener('mousedown', function(event){ 
-        volumeMouseEvent = true;
-        volumeScrubHandler(event);
-      }, false);
-      volumeScrubber .addEventListener('mouseup', function(){ 
-        volumeMouseEvent = false; 
-      }, false);
-      volumeScrubber .addEventListener('mouseleave', function(){ 
-        volumeMouseEvent = false; 
-      }, false);
-      volumeScrubber .addEventListener('mousemove', volumeScrubHandler, false);
-      list.appendChild(volumeScrubber);
+froogaloopelise.volume = function(element){
+	
+	var volume = document.createElement('li');
+		volume.className = '[ froogaloopelise : controls : volume ]';
+	var scrub = document.createElement('span');
+		scrub.className = '[ froogaloopelise : controls : volume-scrub ]';
+		scrub.textContent = 'Volume 5/10';
+		scrub.style.width = '50%';
+		volume.appendChild(scrub);
+	
+	element.froogaloop.api('setVolume', .5);
+	
+	function applyVolume(vol){
+		scrub.textContent = 'Volume ' + vol * 10 + '/10';
+		scrub.style.width = vol * 100 + '%';
+		element.froogaloop.api('setVolume', vol);
+	}
+	
+	var dragging = false;
+	volume.addEventListener('mousedown', function(event){
+		dragging = event.clientX;
+	});
+	document.addEventListener('mousemove', function(event){
+		if(dragging !== false){
+			dragging = event.pageX;
+			var bb = volume.getBoundingClientRect();
+			var vol = (dragging - bb.left) / bb.width;
+			applyVolume(vol);
+		}
+	});
+	document.addEventListener('mouseup', function(){
+		if(dragging !== false){
+			var bb = volume.getBoundingClientRect();
+			var vol = (dragging - bb.left) / bb.width;
+			applyVolume(vol);
+			dragging = false;
+		}
+	});
+	
+	element.querySelector('ul.controls').appendChild(volume);
+	
+}
 
-      var fullscreen, isFullScreen = false;
-		
-      // Play/Pause Button
-      fullscreen = document.createElement('li');
-      fullscreen .className = '[ froogaloop fullscreen ]';
-      fullscreen .textContent = 'Fullscreen';
-      fullscreen .addEventListener('click', function(){
-        if(!isFullScreen && Froogaloopelise.FullScreenAPI.requestFulLScreen(wrapper))
-          isFullScreen = wrapper;
-        else if(isFullScreen && Froogaloopelise.FullScreenAPI.exitFullScreen(wrapper)) 
-          isFullScreen = false;
-      });
-      list.appendChild(fullscreen);
 
-    });
-    
-    return wrapper;
+
+froogaloopelise.fullscreen = function(element){
+	
+	var fullScreen = document.createElement('li');
+		fullScreen.className = '[ froogaloopelise : controls : fullscreen ]';
+		fullScreen.textContent = 'Fullscreen';
+	
+	var fullScreenCancel = (
+		document.exitFullscreen
+		|| document.msExitFullscreen
+		|| document.mozCancelFullScreen
+		|| document.webkitExitFullscreen
+		|| function(){ return false; }
+	);
+	
+	var isFullScreen = false;
+	
+	fullScreen.addEventListener('click', function(event){
+		event.preventDefault();
+		if(isFullScreen) fullScreenCancel.call(document);
+		else if(element.requestFullscreen){
+			element.requestFullscreen();
+		} else if(element.msRequestFullscreen){
+			element.msRequestFullscreen();
+		} else if(element.mozRequestFullScreen){
+			element.mozRequestFullScreen();
+		} else if(element.webkitRequestFullscreen){
+			element.webkitRequestFullscreen();
+		}
+	});
+	
+	['mozfullscreenchange', 'webkitfullscreenchange', 'msfullscreenchange', 'fullscreenchange'].forEach(function(event){
+		element.addEventListener(event, function(){
+			isFullScreen = !isFullScreen;
+			element.className = isFullScreen
+				? '[ froogaloopelise : wrapper : fullscreen ]'
+				: '[ froogaloopelise : wrapper ]';
+			fullScreen.textContent = isFullScreen
+				? 'Exit Fullscreen'
+				: 'Fullscreen';
+			fullScreen.className = isFullScreen
+				? '[ froogaloopelise : controls : fullscreen : exit ]'
+				: '[ froogaloopelise : controls : fullscreen ]';
+		}.bind(this), false)
+	});
+	
+	element.querySelector('ul.controls').appendChild(fullScreen);
+	
+}
+
+froogaloopelise.resizeable = function(element){
+	
+	element.style.height = element.clientWidth / 16 * 9 + 'px';
+	
+	window.addEventListener('resize', function(){
+		element.style.height = element.clientWidth / 16 * 9 + 'px';
+	}, false);
+	
 }
